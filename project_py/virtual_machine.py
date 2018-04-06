@@ -81,11 +81,20 @@ def execute():
 for i in range(11):
     Reg.append(0)
 
-# Execução do Programa
-while PC < 4:
-    file = open('code.txt', 'r')
-    Instr = file.readline(PC)
-    file.close()
-    PC += 1
-    decode()
+# fazer for rodando todas as linhas do programa e executando direto
+file = open('code.txt')
+
+for i in file:
+    Instr = int(i, 2)
     execute()
+
+file.close()
+
+# Execução do Programa
+# while PC < 4:
+#     file = open('code.txt', 'r')  # não precisa do r
+#     Instr = int(file.readline(PC), 2)
+#     file.close()
+#     PC += 1
+#     decode()
+#     execute()
