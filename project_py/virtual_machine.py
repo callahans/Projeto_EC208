@@ -7,25 +7,11 @@
 # 0100: Load
 # 1000: Store
 
-# Constantes pré-definidas:
-ZERO = 0b0000000000000000
-FBITS = 0b0000000000001111
 
 # Registradores:
-PC = 0
-Instr = ZERO
-InstrType = ZERO
-RegSourceA = ZERO
-RegSourceB = ZERO
-RegDest = ZERO
-RegAddrMemory = ZERO
-Reg = []
-mem = []
 
-D = 0
-A = 0
-B = 0
 
+InstrType = ''
 
 # Abrir arquivo de Memória para leitura
 # file = open('progMemory.txt', 'r')
@@ -33,88 +19,124 @@ B = 0
 # file = open('code.txt', 'r')
 
 
-def transform():
-    InstrType = Instr >> 12
-    InstrType = InstrType & FBITS
-    print('InstrType ' + str(InstrType))
-    RegDest = Instr >> 8
-    RegDest = RegDest & FBITS
-    print('RegDest ' + str(RegDest))
-    RegSourceA = Instr >> 4
-    RegSourceA = RegSourceA & FBITS
-    print('RegSourceA ' + str(RegSourceA))
-    RegSourceB = Instr
-    RegSourceB = RegSourceB & FBITS
-    print('RegSourceB ' + str(RegSourceB))
-    decode()
 
 
-# Inicialização de Funções
-def decode():
 
-    print('Decoding...')
+def decode(Instr):
 
-    InstrType = Instr >> 12
 
-    filem = open('progMemory.txt', 'r')
+    InstrType = Instr[:4]
 
-    # t = 0
-    # for i in file:
-    #     mem[t] = int(i, 2)
-    #     t += 1
+    try:
+        InstrType = int(InstrType,2)
+    except:
+        print(InstrType)
+        print(type(InstrType))
 
-    if InstrType == 1:
-        print('Somando...')
-        # Resultado = mem[RegSourceA] + mem[RegSourceB]
-        # Resultado = int(filem.readline(RegSourceA), 2) + int(filem.readline(RegSourceB), 2)
-        # print('Resultado é ' + str(Resultado))
-        # Soma
+    if InstrType == 1 :
+        # Add
+
+        print('SOMANDO...\n')
+
+        A = int(Instr[8:12],2)
+        B = int(Instr[12:16],2)
+
+        C = A + B
+        C = bin(C)
+        C = C[:1] + C[2:5]
+
+        Instr = Instr[:4] + C + Instr[8:16]
+
+        print('RegSourceA: {}'.format(Instr[8:12]))
+        print('RegSourceB: {}'.format(Instr[12:16]))
+        print('Result: {}'.format(C))
+
+        fileMem = open('progMemory.txt', 'a')
+        fileMem.write('{} {} {} {}'.format(Instr[:4],Instr[4:8],Instr[8:12],Instr[12:16]) + '\n')
+        fileMem.close()
+
+
+
 
     elif InstrType == 2:
-        print('Subtraindo...')
         # Sub
+        print('SUBTRAINDO...\n')
+
+        A = int(Instr[8:12],2)
+        B = int(Instr[12:16],2)
+
+        C = A - B
+
+        if C == 3 or C == 2:
+            C = '0' + bin(C)
+            C = C[:2] + C[3:5]
+
+        elif C == 0 or C == 1:
+                C = '00' + bin(C)
+                C = C[:3] + C[4:5]
+        else:
+            C = C[:1] + C[2:5]
+
+
+
+
+        Instr = Instr[:4] + C + Instr[8:16]
+
+
+        print('RegSourceA: {}'.format(Instr[8:12]))
+        print('RegSourceB: {}'.format(Instr[12:16]))
+        print('Result: {}'.format(C))
+
+        fileMem = open('progMemory.txt', 'a')
+        fileMem.write('{} {} {} {}'.format(Instr[:4],Instr[4:8],Instr[8:12],Instr[12:16]) + '\n')
+        fileMem.close()
+
+
 
     elif InstrType == 4:
-        print('Loading...')
         # Load:
+        print('LOADING...\n')
+        print('RegDest: {}'.format(Instr[4:8]))
+        print('RegSourceA: {}'.format(Instr[8:12]))
+        print('RegSourceB: {}'.format(Instr[12:16]))
+
 
     elif InstrType == 8:
-        print('Storing...')
         # Store:
-
-    filem.close()
-    print('Decoded!')
-
-
-def execute():
-    print('Transforming...')
-    transform()
-    print('Results: \n')
-    print('Command: ' + str(InstrType) + '\n')
-    print('Final Addr: ' + str(RegDest) + '\n')
-    print('A: ' + str(RegSourceA) + '\n')
-    print('B: ' + str(RegSourceB) + '\n')
+        print('STORING...\n')
+        print('RegDest: {}'.format(Instr[4:8]))
+        print('RegSourceA: {}'.format(Instr[8:12]))
+        print('RegSourceB: {}'.format(Instr[12:16]))
 
 
-# Inicialização dos Registros
-for i in range(11):
-    Reg.append(0)
+    print('\n\nDecoded!')
+
+
+
+
+
+def execute(Instr):
+
+
+    print('\n\nCommand: {}'.format(Instr[:4]),'\n')
+
+    decode(Instr)
+    print('-------------------------------------')
+
+
+
 
 # Execução com for rodando todas as linhas do programa e executando direto
-file = open('code.txt')
+file = open('code.txt', 'r')
 
-for i in file:
-    Instr = int(i, 2)
-    print(str(i))
-    execute()
+for line in file:
 
+    line = line.rstrip()
+    Instr = line
+
+    try:
+        execute(Instr)
+    except:
+        print(Instr)
+        print(type(Instr))
 file.close()
-
-# Execução do Programa
-# while PC < 4:
-#     file = open('code.txt', 'r')  # não precisa do r
-#     Instr = int(file.readline(PC), 2)
-#     file.close()
-#     PC += 1
-#     decode()
-#     execute()
